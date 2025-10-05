@@ -18,9 +18,9 @@ console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded ✓" : "Missing ✗"
 
 // Nodemailer configuration with additional settings
 const contactEmail = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // Use TLS
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT), // Convert to number
+  secure: process.env.SMTP_PORT == 465, // true for 465, false for 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -29,6 +29,7 @@ const contactEmail = nodemailer.createTransport({
     rejectUnauthorized: false
   }
 });
+
 
 // Verify email connection
 contactEmail.verify((error) => {
