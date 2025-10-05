@@ -1,17 +1,17 @@
 const express = require("express");
 const cors = require("cors");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 require("dotenv").config();
 
 const app = express();
 
-// CORS Configuration - Allow your Vercel frontend
+// CORS Configuration
 const corsOptions = {
   origin: [
     'http://localhost:3000',
     'http://localhost:3001',
-    'https://portfolio-frontend-seven-theta.vercel.app/', // Replace with your actual Vercel domain
-    /\.vercel\.app$/ // Allow all Vercel preview deployments
+    'https://portfolio-frontend-seven-theta.vercel.app/',
+    /\.vercel\.app$/
   ],
   credentials: true,
   optionsSuccessStatus: 200
@@ -23,43 +23,16 @@ app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 5000;
 
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 // Debug environment variables
 console.log("=== Environment Check ===");
-console.log("EMAIL_USER:", process.env.EMAIL_USER ? "Loaded ✓" : "Missing ✗");
-console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded ✓" : "Missing ✗");
-console.log("SMTP_HOST:", process.env.SMTP_HOST || "Using default (gmail)");
-console.log("SMTP_PORT:", process.env.SMTP_PORT || "Using default (587)");
+console.log("RESEND_API_KEY:", process.env.RESEND_API_KEY ? "Loaded ✓" : "Missing ✗");
+console.log("FROM_EMAIL:", process.env.FROM_EMAIL || "Missing ✗");
+console.log("RECIPIENT_EMAIL:", process.env.RECIPIENT_EMAIL || "Missing ✗");
 console.log("NODE_ENV:", process.env.NODE_ENV || "development");
 console.log("========================");
-
-// Enhanced Nodemailer configuration
-const contactEmail = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-  socketTimeout: 15000,
-  pool: true,
-  maxConnections: 5,
-  maxMessages: 100
-});
-
-// Verify email connection
-contactEmail.verify((error) => {
-  if (error) {
-    console.log("❌ Email verification failed:");
-    console.log("Error details:", error.message);
-    console.log("\n🔧 Troubleshooting tips:");
-    console.log("1. Verify EMAIL_USER and EMAIL_PASS in Render environment variables");
-    console.log("2. Use Gmail App Password (16 characters, no spaces)");
-    console.log("3. Check that 2FA is enabled on your Gmail account");
-  } else {
-    console.log("✅ Email service ready to send messages");
-  }
-});
 
 // Root endpoint
 app.get("/", (req, res) => {
@@ -79,7 +52,7 @@ app.get("/health", (req, res) => {
   res.json({ 
     status: "ok", 
     timestamp: new Date().toISOString(),
-    emailConfigured: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS),
+    emailConfigured: !!process.env.RESEND_API_KEY,
     environment: process.env.NODE_ENV || "development"
   });
 });
@@ -103,10 +76,10 @@ app.post("/contact", async (req, res) => {
     
     const name = `${firstName} ${lastName}`;
     
-    const mail = {
-      from: `"${name}" <${process.env.EMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: process.env.FROM_EMAIL, // Must be your verified domain email
       replyTo: email,
-      to: process.env.RECIPIENT_EMAIL || process.env.EMAIL_USER,
+      to: process.env.RECIPIENT_EMAIL,
       subject: `New Message from ${name} - Portfolio Contact Form`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
@@ -130,10 +103,17 @@ app.post("/contact", async (req, res) => {
           </div>
         </div>
       `,
-    };
+    });
     
-    await contactEmail.sendMail(mail);
-    console.log("✅ Email sent successfully to:", mail.to);
+    if (error) {
+      console.error("❌ Resend error:", error);
+      return res.status(400).json({ 
+        code: 400, 
+        status: error.message 
+      });
+    }
+    
+    console.log("✅ Email sent successfully:", data);
     
     res.status(200).json({ 
       code: 200, 
@@ -166,9 +146,10 @@ app.post("/newsletter", async (req, res) => {
       });
     }
     
-    const notificationMail = {
-      from: process.env.EMAIL_USER,
-      to: process.env.RECIPIENT_EMAIL || process.env.EMAIL_USER,
+    // Send notification to yourself
+    const { data: notificationData, error: notificationError } = await resend.emails.send({
+      from: process.env.FROM_EMAIL,
+      to: process.env.RECIPIENT_EMAIL,
       subject: `New Newsletter Subscription - ${email}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
@@ -186,10 +167,18 @@ app.post("/newsletter", async (req, res) => {
           </div>
         </div>
       `,
-    };
+    });
     
-    const welcomeMail = {
-      from: `"Surya Pratap Singh" <${process.env.EMAIL_USER}>`,
+    if (notificationError) {
+      console.error("❌ Error sending notification:", notificationError);
+      throw notificationError;
+    }
+    
+    console.log("✅ Notification sent for new subscriber:", email);
+    
+    // Send welcome email to subscriber
+    const { data: welcomeData, error: welcomeError } = await resend.emails.send({
+      from: process.env.FROM_EMAIL,
       to: email,
       subject: "Welcome to My Newsletter! 🎉",
       html: `
@@ -218,14 +207,14 @@ app.post("/newsletter", async (req, res) => {
           </div>
         </div>
       `,
-    };
+    });
     
-    // Send both emails
-    await contactEmail.sendMail(notificationMail);
-    console.log("✅ Notification sent for new subscriber:", email);
-    
-    await contactEmail.sendMail(welcomeMail);
-    console.log("✅ Welcome email sent to:", email);
+    if (welcomeError) {
+      console.error("❌ Error sending welcome email:", welcomeError);
+      // Don't throw error here, notification was sent successfully
+    } else {
+      console.log("✅ Welcome email sent to:", email);
+    }
     
     res.status(200).json({ 
       code: 200, 
@@ -264,5 +253,5 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
