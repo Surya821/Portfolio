@@ -5,16 +5,30 @@ require("dotenv").config();
 
 const app = express();
 
-// CORS Configuration
+// CORS Configuration - Allow all Vercel deployments
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'https://portfolio-frontend-seven-theta.vercel.app/',
-    /\.vercel\.app$/
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://portfolio-frontend-ten-ochre.vercel.app',
+      'https://portfolio-frontend-seven-theta.vercel.app'
+    ];
+    
+    // Check if origin is in allowed list OR is a Vercel domain
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 app.use(cors(corsOptions));
