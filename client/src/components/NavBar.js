@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import navIcon1 from '../assets/img/nav-icon1.svg';
 import navIcon2 from '../assets/img/nav-icon2.svg';
 import navIcon3 from '../assets/img/nav-icon3.svg';
-import { HashLink } from 'react-router-hash-link';
 
 export const NavBar = () => {
   const [activeLink, setActiveLink] = useState('home');
@@ -100,9 +99,9 @@ export const NavBar = () => {
               <a href="https://github.com/Surya821" target="_blank" rel="noopener noreferrer"><img src={navIcon2} alt="" /></a>
               <a href="https://leetcode.com/u/suryapratap821/" target="_blank" rel="noopener noreferrer"><img src={navIcon3} alt="" /></a>
             </div>
-            <HashLink to='#connect'>
-              <button className="vvd" onClick={() => handleNavClick('connect')}><span>Let's Connect</span></button>
-            </HashLink>
+            <button className="vvd" onClick={() => handleNavClick('connect')}>
+              <span>Let's Connect</span>
+            </button>
           </span>
         </Navbar.Collapse>
       </Container>
