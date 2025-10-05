@@ -14,8 +14,7 @@ const corsOptions = {
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:3001',
-      'https://portfolio-frontend-ten-ochre.vercel.app',
-      'https://portfolio-frontend-seven-theta.vercel.app'
+      'https://portfolio-frontend-ten-ochre.vercel.app/'
     ];
     
     // Check if origin is in allowed list OR is a Vercel domain
