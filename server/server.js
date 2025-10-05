@@ -19,24 +19,15 @@ console.log("SMTP_PORT:", process.env.SMTP_PORT || "Not set");
 
 // Enhanced Nodemailer configuration
 const contactEmail = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT) || 587,
-  secure: process.env.SMTP_PORT == 465,
+  service: 'gmail', // Use Gmail service
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
-  tls: {
-    rejectUnauthorized: false,
-    minVersion: 'TLSv1.2'
-  },
   // Add timeout and connection settings
-  connectionTimeout: 10000, // 10 seconds
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-  // Add debug for troubleshooting
-  debug: true,
-  logger: true
+  connectionTimeout: 15000, // 15 seconds
+  greetingTimeout: 15000,
+  socketTimeout: 15000
 });
 
 // Verify email connection with better error handling
@@ -72,7 +63,7 @@ router.post("/contact", async (req, res) => {
     }
     
     const mail = {
-      from: process.env.RECIPIENT_EMAIL, // Must be verified sender
+      from: `"${name}" <${process.env.EMAIL_USER}>`,
       replyTo: email,
       to: process.env.RECIPIENT_EMAIL,
       subject: `New Message from ${name} - Portfolio Contact Form`,
@@ -126,7 +117,7 @@ router.post("/newsletter", async (req, res) => {
     }
     
     const notificationMail = {
-      from: process.env.RECIPIENT_EMAIL,
+      from: process.env.EMAIL_USER,
       to: process.env.RECIPIENT_EMAIL,
       subject: `New Newsletter Subscription - ${email}`,
       html: `
@@ -152,7 +143,7 @@ router.post("/newsletter", async (req, res) => {
     };
     
     const welcomeMail = {
-      from: process.env.RECIPIENT_EMAIL,
+      from: `"Surya Pratap Singh" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Welcome to My Newsletter! 🎉",
       html: `
