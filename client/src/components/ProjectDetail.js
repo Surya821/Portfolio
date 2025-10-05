@@ -1,5 +1,6 @@
 import { Container, Row, Col } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 import colorSharp2 from "../assets/img/color-sharp2.png";
 import FImg1 from "../assets/ProjImg/Fhome.png";
 import FImg2 from "../assets/ProjImg/Fmenu.png";
@@ -14,11 +15,77 @@ import projImg4 from "../assets/img/project-img4.png";
 import 'animate.css';
 import TrackVisibility from 'react-on-screen';
 
+// Lazy Loading Image Component
+const LazyImage = ({ src, alt, className = "" }) => {
+  const [imageSrc, setImageSrc] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const imgRef = useRef();
+
+  useEffect(() => {
+    let observer;
+    
+    if (imgRef.current) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setImageSrc(src);
+              observer.unobserve(imgRef.current);
+            }
+          });
+        },
+        {
+          rootMargin: '100px', // Start loading 100px before visible
+        }
+      );
+
+      observer.observe(imgRef.current);
+    }
+
+    return () => {
+      if (observer && imgRef.current) {
+        observer.unobserve(imgRef.current);
+      }
+    };
+  }, [src]);
+
+  return (
+    <div 
+      ref={imgRef}
+      className={`lazy-image-container ${className}`}
+      style={{
+        position: 'relative',
+        backgroundColor: '#1a1a1a',
+        minHeight: '200px',
+      }}
+    >
+      {!imageLoaded && (
+        <div className="image-skeleton">
+          <div className="skeleton-shimmer"></div>
+        </div>
+      )}
+      {imageSrc && (
+        <img
+          src={imageSrc}
+          alt={alt}
+          style={{
+            opacity: imageLoaded ? 1 : 0,
+            transition: 'opacity 0.5s ease-in-out',
+            width: '100%',
+            height: 'auto',
+            display: 'block',
+          }}
+          onLoad={() => setImageLoaded(true)}
+        />
+      )}
+    </div>
+  );
+};
+
 export const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Using the existing project images from your Projects component
   const projectsData = {
     "food-delivery-app": {
       title: "Food Delivery App",
@@ -127,7 +194,10 @@ export const ProjectDetail = () => {
                   </div>
 
                   <div className="project-main-image">
-                    <img src={project.images[0]} alt={project.title} />
+                    <LazyImage 
+                      src={project.images[0]} 
+                      alt={project.title}
+                    />
                   </div>
 
                   <Row className="project-info-section">
@@ -197,7 +267,10 @@ export const ProjectDetail = () => {
                         {project.images.slice(1).map((image, index) => (
                           <Col key={index} md={6} className="mb-4">
                             <div className="gallery-image">
-                              <img src={image} alt={`${project.title} screenshot ${index + 2}`} />
+                              <LazyImage 
+                                src={image} 
+                                alt={`${project.title} screenshot ${index + 2}`}
+                              />
                             </div>
                           </Col>
                         ))}
@@ -210,7 +283,7 @@ export const ProjectDetail = () => {
           </Col>
         </Row>
       </Container>
-      <img className="background-image-right" src={colorSharp2} alt="" />
+      <img className="background-image-right" src={colorSharp2} alt="" loading="lazy" />
     </section>
   );
 }
