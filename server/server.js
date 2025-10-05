@@ -72,9 +72,9 @@ router.post("/contact", async (req, res) => {
     }
     
     const mail = {
-      from: `"${name}" <${process.env.EMAIL_USER}>`,
+      from: process.env.RECIPIENT_EMAIL, // Must be verified sender
       replyTo: email,
-      to: process.env.RECIPIENT_EMAIL || process.env.EMAIL_USER,
+      to: process.env.RECIPIENT_EMAIL,
       subject: `New Message from ${name} - Portfolio Contact Form`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
@@ -126,8 +126,8 @@ router.post("/newsletter", async (req, res) => {
     }
     
     const notificationMail = {
-      from: process.env.EMAIL_USER,
-      to: process.env.RECIPIENT_EMAIL || process.env.EMAIL_USER,
+      from: process.env.RECIPIENT_EMAIL,
+      to: process.env.RECIPIENT_EMAIL,
       subject: `New Newsletter Subscription - ${email}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
@@ -152,7 +152,7 @@ router.post("/newsletter", async (req, res) => {
     };
     
     const welcomeMail = {
-      from: `"Surya Pratap Singh" <${process.env.EMAIL_USER}>`,
+      from: process.env.RECIPIENT_EMAIL,
       to: email,
       subject: "Welcome to My Newsletter! 🎉",
       html: `
