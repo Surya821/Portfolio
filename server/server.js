@@ -1,71 +1,112 @@
 const express = require("express");
-const router = express.Router();
 const cors = require("cors");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 const app = express();
-app.use(cors());
+
+// CORS Configuration - Allow your Vercel frontend
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://portfolio-frontend-seven-theta.vercel.app/', // Replace with your actual Vercel domain
+    /\.vercel\.app$/ // Allow all Vercel preview deployments
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
-app.use("/", router);
+app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 5000;
 
 // Debug environment variables
+console.log("=== Environment Check ===");
 console.log("EMAIL_USER:", process.env.EMAIL_USER ? "Loaded ✓" : "Missing ✗");
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded ✓" : "Missing ✗");
-console.log("SMTP_HOST:", process.env.SMTP_HOST || "Not set");
-console.log("SMTP_PORT:", process.env.SMTP_PORT || "Not set");
+console.log("SMTP_HOST:", process.env.SMTP_HOST || "Using default (gmail)");
+console.log("SMTP_PORT:", process.env.SMTP_PORT || "Using default (587)");
+console.log("NODE_ENV:", process.env.NODE_ENV || "development");
+console.log("========================");
 
 // Enhanced Nodemailer configuration
 const contactEmail = nodemailer.createTransport({
-  service: 'gmail', // Use Gmail service
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
-  // Add timeout and connection settings
-  connectionTimeout: 15000, // 15 seconds
+  connectionTimeout: 15000,
   greetingTimeout: 15000,
-  socketTimeout: 15000
+  socketTimeout: 15000,
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100
 });
 
-// Verify email connection with better error handling
+// Verify email connection
 contactEmail.verify((error) => {
   if (error) {
     console.log("❌ Email verification failed:");
     console.log("Error details:", error.message);
     console.log("\n🔧 Troubleshooting tips:");
-    console.log("1. Check your SMTP credentials in .env file");
-    console.log("2. If using Gmail, ensure you're using an App Password");
-    console.log("3. Verify SMTP_HOST and SMTP_PORT are correct");
-    console.log("4. Check if your hosting provider blocks SMTP ports");
-    console.log("5. Try using port 465 (secure) or 587 (TLS)");
+    console.log("1. Verify EMAIL_USER and EMAIL_PASS in Render environment variables");
+    console.log("2. Use Gmail App Password (16 characters, no spaces)");
+    console.log("3. Check that 2FA is enabled on your Gmail account");
   } else {
     console.log("✅ Email service ready to send messages");
   }
 });
 
-// Contact form endpoint with better error handling
-router.post("/contact", async (req, res) => {
+// Root endpoint
+app.get("/", (req, res) => {
+  res.json({ 
+    message: "Portfolio Backend API",
+    status: "running",
+    endpoints: {
+      health: "/health",
+      contact: "POST /contact",
+      newsletter: "POST /newsletter"
+    }
+  });
+});
+
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({ 
+    status: "ok", 
+    timestamp: new Date().toISOString(),
+    emailConfigured: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS),
+    environment: process.env.NODE_ENV || "development"
+  });
+});
+
+// Contact form endpoint
+app.post("/contact", async (req, res) => {
+  console.log("📧 Received contact form submission");
+  console.log("Request body:", req.body);
+  
   try {
-    const name = req.body.firstName + " " + req.body.lastName;
-    const email = req.body.email;
-    const message = req.body.message;
-    const phone = req.body.phone;
+    const { firstName, lastName, email, message, phone } = req.body;
     
     // Validate input
-    if (!name || !email || !message) {
-      return res.json({ 
+    if (!firstName || !lastName || !email || !message) {
+      console.log("❌ Missing required fields");
+      return res.status(400).json({ 
         code: 400, 
         status: "Missing required fields" 
       });
     }
     
+    const name = `${firstName} ${lastName}`;
+    
     const mail = {
       from: `"${name}" <${process.env.EMAIL_USER}>`,
       replyTo: email,
-      to: process.env.RECIPIENT_EMAIL,
+      to: process.env.RECIPIENT_EMAIL || process.env.EMAIL_USER,
       subject: `New Message from ${name} - Portfolio Contact Form`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
@@ -75,7 +116,7 @@ router.post("/contact", async (req, res) => {
             <div style="margin: 20px 0;">
               <p style="margin: 10px 0;"><strong style="color: #555;">Name:</strong> ${name}</p>
               <p style="margin: 10px 0;"><strong style="color: #555;">Email:</strong> <a href="mailto:${email}">${email}</a></p>
-              <p style="margin: 10px 0;"><strong style="color: #555;">Phone:</strong> ${phone}</p>
+              <p style="margin: 10px 0;"><strong style="color: #555;">Phone:</strong> ${phone || 'Not provided'}</p>
             </div>
             
             <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #4CAF50; border-radius: 5px;">
@@ -84,7 +125,7 @@ router.post("/contact", async (req, res) => {
             </div>
             
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 12px;">
-              <p>This message was sent from your portfolio contact form.</p>
+              <p>This message was sent from your portfolio contact form at ${new Date().toLocaleString()}</p>
             </div>
           </div>
         </div>
@@ -93,24 +134,33 @@ router.post("/contact", async (req, res) => {
     
     await contactEmail.sendMail(mail);
     console.log("✅ Email sent successfully to:", mail.to);
-    res.json({ code: 200, status: "Message Sent" });
+    
+    res.status(200).json({ 
+      code: 200, 
+      status: "Message Sent" 
+    });
     
   } catch (error) {
-    console.log("❌ Error sending email:", error.message);
-    res.json({ 
+    console.error("❌ Error sending email:", error);
+    res.status(500).json({ 
       code: 500, 
-      status: "Error sending message. Please try again later." 
+      status: "Error sending message. Please try again later.",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
 
 // Newsletter subscription endpoint
-router.post("/newsletter", async (req, res) => {
+app.post("/newsletter", async (req, res) => {
+  console.log("📬 Received newsletter subscription");
+  console.log("Request body:", req.body);
+  
   try {
-    const email = req.body.email;
+    const { email } = req.body;
     
     if (!email || !email.includes("@")) {
-      return res.json({ 
+      console.log("❌ Invalid email address");
+      return res.status(400).json({ 
         code: 400, 
         status: "Invalid email address" 
       });
@@ -118,7 +168,7 @@ router.post("/newsletter", async (req, res) => {
     
     const notificationMail = {
       from: process.env.EMAIL_USER,
-      to: process.env.RECIPIENT_EMAIL,
+      to: process.env.RECIPIENT_EMAIL || process.env.EMAIL_USER,
       subject: `New Newsletter Subscription - ${email}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
@@ -132,10 +182,6 @@ router.post("/newsletter", async (req, res) => {
             
             <div style="margin-top: 20px; padding: 15px; background: linear-gradient(90.21deg, rgba(170, 54, 124, 0.1) -5.91%, rgba(74, 47, 189, 0.1) 111.58%); border-radius: 5px;">
               <p style="margin: 0; color: #666; font-size: 14px;">Subscribed on: ${new Date().toLocaleString()}</p>
-            </div>
-            
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 12px;">
-              <p>This notification was sent from your portfolio newsletter subscription form.</p>
             </div>
           </div>
         </div>
@@ -181,27 +227,42 @@ router.post("/newsletter", async (req, res) => {
     await contactEmail.sendMail(welcomeMail);
     console.log("✅ Welcome email sent to:", email);
     
-    res.json({ code: 200, status: "Successfully subscribed!" });
+    res.status(200).json({ 
+      code: 200, 
+      status: "Successfully subscribed!" 
+    });
     
   } catch (error) {
-    console.log("❌ Error in newsletter subscription:", error.message);
-    res.json({ 
+    console.error("❌ Error in newsletter subscription:", error);
+    res.status(500).json({ 
       code: 500, 
-      status: "Error processing subscription. Please try again later." 
+      status: "Error processing subscription. Please try again later.",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
 
-// Health check endpoint
-router.get("/health", (req, res) => {
-  res.json({ 
-    status: "ok", 
-    timestamp: new Date().toISOString(),
-    emailConfigured: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS)
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ 
+    code: 404, 
+    status: "Endpoint not found",
+    path: req.path
+  });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error("Server Error:", err);
+  res.status(500).json({ 
+    code: 500, 
+    status: "Internal server error",
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
