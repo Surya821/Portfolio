@@ -31,6 +31,8 @@ export const NavBar = () => {
   }
 
   const handleNavClick = (section) => {
+    onUpdateActiveLink(section);
+    
     // If we're on a project detail page, navigate to home first
     if (location.pathname.startsWith('/project/')) {
       navigate('/', { replace: true });
@@ -41,8 +43,13 @@ export const NavBar = () => {
           element.scrollIntoView({ behavior: 'smooth' });
         }
       }, 100);
+    } else {
+      // We're already on the home page, just scroll
+      const element = document.getElementById(section);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
-    onUpdateActiveLink(section);
   }
 
   return (
