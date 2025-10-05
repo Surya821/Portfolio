@@ -4,267 +4,380 @@ const { Resend } = require("resend");
 require("dotenv").config();
 
 const app = express();
-
-// CORS Configuration - Allow all Vercel deployments
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'https://portfolio-frontend-ten-ochre.vercel.app/'
-    ];
-    
-    // Check if origin is in allowed list OR is a Vercel domain
-    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-};
-
-app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
 const PORT = process.env.PORT || 5000;
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+// ============= SIMPLE CORS - ALLOW EVERYTHING =============
+app.use(cors());
+app.use(json());
+app.use(urlencoded({ extended: true }));
 
-// Debug environment variables
-console.log("=== Environment Check ===");
-console.log("RESEND_API_KEY:", process.env.RESEND_API_KEY ? "Loaded ✓" : "Missing ✗");
-console.log("FROM_EMAIL:", process.env.FROM_EMAIL || "Missing ✗");
-console.log("RECIPIENT_EMAIL:", process.env.RECIPIENT_EMAIL || "Missing ✗");
-console.log("NODE_ENV:", process.env.NODE_ENV || "development");
-console.log("========================");
+// ============= RESEND SETUP (LAZY LOAD) =============
+let resend = null;
 
-// Root endpoint
+function getResend() {
+  if (!resend && process.env.RESEND_API_KEY) {
+    const { Resend } = require("resend");
+    resend = new Resend(process.env.RESEND_API_KEY);
+    console.log("✅ Resend initialized");
+  }
+  return resend;
+}
+
+// ============= STARTUP LOGS =============
+console.log("\n==========================================");
+console.log("🚀 Portfolio Backend Server Starting...");
+console.log("==========================================");
+console.log("📍 Port:", PORT);
+console.log("🔑 RESEND_API_KEY:", process.env.RESEND_API_KEY ? "✓ Configured" : "❌ MISSING");
+console.log("📧 FROM_EMAIL:", process.env.FROM_EMAIL || "❌ MISSING");
+console.log("📨 RECIPIENT_EMAIL:", process.env.RECIPIENT_EMAIL || "❌ MISSING");
+console.log("🌍 NODE_ENV:", process.env.NODE_ENV || "development");
+console.log("==========================================\n");
+
+// ============= ROOT ENDPOINT =============
 app.get("/", (req, res) => {
+  console.log("📍 Root endpoint hit");
   res.json({ 
+    success: true,
     message: "Portfolio Backend API",
     status: "running",
+    timestamp: new Date().toISOString(),
     endpoints: {
-      health: "/health",
+      health: "GET /health",
       contact: "POST /contact",
       newsletter: "POST /newsletter"
     }
   });
 });
 
-// Health check endpoint
+// ============= HEALTH CHECK =============
 app.get("/health", (req, res) => {
-  res.json({ 
-    status: "ok", 
+  console.log("🏥 Health check requested");
+  
+  const health = {
+    success: true,
+    status: "healthy", 
     timestamp: new Date().toISOString(),
-    emailConfigured: !!process.env.RESEND_API_KEY,
-    environment: process.env.NODE_ENV || "development"
-  });
+    config: {
+      resendConfigured: !!process.env.RESEND_API_KEY,
+      fromEmail: process.env.FROM_EMAIL || "not set",
+      recipientEmail: process.env.RECIPIENT_EMAIL || "not set"
+    },
+    environment: process.env.NODE_ENV || "development",
+    port: PORT
+  };
+  
+  console.log("Health:", health);
+  res.json(health);
 });
 
-// Contact form endpoint
+// ============= CONTACT FORM =============
 app.post("/contact", async (req, res) => {
-  console.log("📧 Received contact form submission");
-  console.log("Request body:", req.body);
+  console.log("\n📧 ============= CONTACT FORM REQUEST =============");
+  console.log("Time:", new Date().toISOString());
+  console.log("Origin:", req.headers.origin || "No origin header");
+  console.log("Method:", req.method);
+  console.log("Body:", JSON.stringify(req.body, null, 2));
   
   try {
+    // Extract data
     const { firstName, lastName, email, message, phone } = req.body;
     
-    // Validate input
+    // Validate
     if (!firstName || !lastName || !email || !message) {
-      console.log("❌ Missing required fields");
+      console.log("❌ Validation failed - missing required fields");
       return res.status(400).json({ 
+        success: false,
         code: 400, 
-        status: "Missing required fields" 
+        status: "Missing required fields (firstName, lastName, email, message)" 
+      });
+    }
+
+    // Check Resend config
+    if (!process.env.RESEND_API_KEY) {
+      console.error("❌ CRITICAL: RESEND_API_KEY not set!");
+      return res.status(500).json({
+        success: false,
+        code: 500,
+        status: "Email service not configured. Please contact administrator."
+      });
+    }
+
+    if (!process.env.FROM_EMAIL || !process.env.RECIPIENT_EMAIL) {
+      console.error("❌ CRITICAL: FROM_EMAIL or RECIPIENT_EMAIL not set!");
+      return res.status(500).json({
+        success: false,
+        code: 500,
+        status: "Email addresses not configured. Please contact administrator."
       });
     }
     
     const name = `${firstName} ${lastName}`;
+    const resendClient = getResend();
     
-    const { data, error } = await resend.emails.send({
-      from: process.env.FROM_EMAIL, // Must be your verified domain email
+    console.log("📤 Attempting to send email...");
+    console.log("From:", process.env.FROM_EMAIL);
+    console.log("To:", process.env.RECIPIENT_EMAIL);
+    console.log("Reply-To:", email);
+    
+    // Send email
+    const { data, error } = await resendClient.emails.send({
+      from: process.env.FROM_EMAIL,
       replyTo: email,
       to: process.env.RECIPIENT_EMAIL,
-      subject: `New Message from ${name} - Portfolio Contact Form`,
+      subject: `New Contact Form Message from ${name}`,
       html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h2 style="color: #333; border-bottom: 3px solid #4CAF50; padding-bottom: 10px;">New Contact Form Submission</h2>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+          <div style="max-width: 600px; margin: 20px auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
             
-            <div style="margin: 20px 0;">
-              <p style="margin: 10px 0;"><strong style="color: #555;">Name:</strong> ${name}</p>
-              <p style="margin: 10px 0;"><strong style="color: #555;">Email:</strong> <a href="mailto:${email}">${email}</a></p>
-              <p style="margin: 10px 0;"><strong style="color: #555;">Phone:</strong> ${phone || 'Not provided'}</p>
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+              <h1 style="margin: 0; color: white; font-size: 24px;">New Contact Form Submission</h1>
             </div>
             
-            <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #4CAF50; border-radius: 5px;">
-              <p style="margin: 0 0 10px 0;"><strong style="color: #555;">Message:</strong></p>
-              <p style="margin: 0; color: #333; line-height: 1.6;">${message}</p>
+            <!-- Content -->
+            <div style="padding: 30px;">
+              
+              <!-- Contact Info -->
+              <div style="background-color: #f8f9fa; border-radius: 6px; padding: 20px; margin-bottom: 20px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #666; font-weight: bold;">Name:</td>
+                    <td style="padding: 8px 0; color: #333;">${name}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666; font-weight: bold;">Email:</td>
+                    <td style="padding: 8px 0;"><a href="mailto:${email}" style="color: #667eea; text-decoration: none;">${email}</a></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #666; font-weight: bold;">Phone:</td>
+                    <td style="padding: 8px 0; color: #333;">${phone || 'Not provided'}</td>
+                  </tr>
+                </table>
+              </div>
+              
+              <!-- Message -->
+              <div style="background-color: #fff; border-left: 4px solid #667eea; padding: 20px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 10px 0; color: #333; font-size: 16px;">Message:</h3>
+                <p style="margin: 0; color: #555; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+              </div>
+              
             </div>
             
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 12px;">
-              <p>This message was sent from your portfolio contact form at ${new Date().toLocaleString()}</p>
+            <!-- Footer -->
+            <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0;">
+              <p style="margin: 0; color: #999; font-size: 12px;">
+                Received on ${new Date().toLocaleString('en-US', { 
+                  dateStyle: 'full', 
+                  timeStyle: 'short' 
+                })}
+              </p>
             </div>
+            
           </div>
-        </div>
+        </body>
+        </html>
       `,
     });
     
     if (error) {
-      console.error("❌ Resend error:", error);
-      return res.status(400).json({ 
-        code: 400, 
-        status: error.message 
+      console.error("❌ Resend API Error:", error);
+      return res.status(500).json({ 
+        success: false,
+        code: 500, 
+        status: "Failed to send email. Please try again later.",
+        error: error.message 
       });
     }
     
-    console.log("✅ Email sent successfully:", data);
+    console.log("✅ Email sent successfully!");
+    console.log("Email ID:", data?.id);
+    console.log("=================================================\n");
     
     res.status(200).json({ 
+      success: true,
       code: 200, 
-      status: "Message Sent" 
+      status: "Message Sent",
+      emailId: data?.id
     });
     
   } catch (error) {
-    console.error("❌ Error sending email:", error);
+    console.error("❌ Unexpected error in /contact endpoint:", error);
+    console.error("Stack:", error.stack);
     res.status(500).json({ 
+      success: false,
       code: 500, 
-      status: "Error sending message. Please try again later.",
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      status: "An unexpected error occurred. Please try again later.",
+      error: error.message
     });
   }
 });
 
-// Newsletter subscription endpoint
+// ============= NEWSLETTER =============
 app.post("/newsletter", async (req, res) => {
-  console.log("📬 Received newsletter subscription");
-  console.log("Request body:", req.body);
+  console.log("\n📬 ============= NEWSLETTER REQUEST =============");
+  console.log("Time:", new Date().toISOString());
+  console.log("Body:", req.body);
   
   try {
     const { email } = req.body;
     
+    // Validate
     if (!email || !email.includes("@")) {
       console.log("❌ Invalid email address");
       return res.status(400).json({ 
+        success: false,
         code: 400, 
-        status: "Invalid email address" 
+        status: "Please enter a valid email address" 
       });
     }
+
+    // Check config
+    if (!process.env.RESEND_API_KEY || !process.env.FROM_EMAIL || !process.env.RECIPIENT_EMAIL) {
+      console.error("❌ Email service not configured");
+      return res.status(500).json({
+        success: false,
+        code: 500,
+        status: "Email service not configured"
+      });
+    }
+
+    const resendClient = getResend();
     
-    // Send notification to yourself
-    const { data: notificationData, error: notificationError } = await resend.emails.send({
+    console.log("📤 Sending notification to:", process.env.RECIPIENT_EMAIL);
+    
+    // Send notification to you
+    const { error: notifyError } = await resendClient.emails.send({
       from: process.env.FROM_EMAIL,
       to: process.env.RECIPIENT_EMAIL,
-      subject: `New Newsletter Subscription - ${email}`,
+      subject: `New Newsletter Subscriber: ${email}`,
       html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h2 style="color: #333; border-bottom: 3px solid #AA367C; padding-bottom: 10px;">📧 New Newsletter Subscriber!</h2>
-            
-            <div style="margin: 20px 0; padding: 20px; background-color: #f9f9f9; border-radius: 5px;">
-              <p style="margin: 0; font-size: 16px;"><strong style="color: #555;">Email:</strong></p>
-              <p style="margin: 10px 0 0 0; font-size: 18px; color: #AA367C;"><strong>${email}</strong></p>
+        <!DOCTYPE html>
+        <html>
+        <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+          <div style="max-width: 500px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px;">
+            <h2 style="color: #AA367C; margin-top: 0;">📧 New Newsletter Subscriber!</h2>
+            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <p style="margin: 0; font-size: 18px;"><strong>${email}</strong></p>
             </div>
-            
-            <div style="margin-top: 20px; padding: 15px; background: linear-gradient(90.21deg, rgba(170, 54, 124, 0.1) -5.91%, rgba(74, 47, 189, 0.1) 111.58%); border-radius: 5px;">
-              <p style="margin: 0; color: #666; font-size: 14px;">Subscribed on: ${new Date().toLocaleString()}</p>
-            </div>
+            <p style="color: #666; font-size: 14px;">Subscribed on: ${new Date().toLocaleString()}</p>
           </div>
-        </div>
+        </body>
+        </html>
       `,
     });
     
-    if (notificationError) {
-      console.error("❌ Error sending notification:", notificationError);
-      throw notificationError;
+    if (notifyError) {
+      console.error("❌ Failed to send notification:", notifyError);
+    } else {
+      console.log("✅ Notification sent");
     }
     
-    console.log("✅ Notification sent for new subscriber:", email);
+    console.log("📤 Sending welcome email to:", email);
     
-    // Send welcome email to subscriber
-    const { data: welcomeData, error: welcomeError } = await resend.emails.send({
+    // Send welcome email
+    const { error: welcomeError } = await resendClient.emails.send({
       from: process.env.FROM_EMAIL,
       to: email,
       subject: "Welcome to My Newsletter! 🎉",
       html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h2 style="color: #333; background: linear-gradient(90.21deg, #AA367C -5.91%, #4A2FBD 111.58%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Welcome! 🎉</h2>
-            
-            <p style="color: #555; font-size: 16px; line-height: 1.6;">Thank you for subscribing to my newsletter!</p>
-            
-            <p style="color: #555; font-size: 16px; line-height: 1.6;">You'll be the first to know about:</p>
-            
-            <ul style="color: #555; font-size: 15px; line-height: 1.8;">
-              <li>New projects and updates</li>
+        <!DOCTYPE html>
+        <html>
+        <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px;">
+            <h2 style="color: #AA367C;">Welcome! 🎉</h2>
+            <p style="font-size: 16px; line-height: 1.6;">Thank you for subscribing to my newsletter!</p>
+            <p style="font-size: 16px;">You'll receive updates about:</p>
+            <ul style="line-height: 1.8; color: #555;">
+              <li>New projects and portfolio updates</li>
               <li>Tech insights and tutorials</li>
               <li>Industry news and trends</li>
               <li>Exclusive content and resources</li>
             </ul>
-            
-            <div style="margin: 30px 0; padding: 20px; background: linear-gradient(90.21deg, rgba(170, 54, 124, 0.1) -5.91%, rgba(74, 47, 189, 0.1) 111.58%); border-radius: 10px; text-align: center;">
-              <p style="margin: 0; color: #333; font-size: 16px;">Stay tuned for exciting updates!</p>
-            </div>
-            
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center;">
-              <p style="color: #999; font-size: 12px; margin-bottom: 10px;">Best regards,<br><strong style="color: #555;">Surya Pratap Singh</strong></p>
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+              <p style="color: #666;">Best regards,<br><strong>Surya Pratap Singh</strong></p>
             </div>
           </div>
-        </div>
+        </body>
+        </html>
       `,
     });
     
     if (welcomeError) {
-      console.error("❌ Error sending welcome email:", welcomeError);
-      // Don't throw error here, notification was sent successfully
+      console.error("❌ Failed to send welcome email:", welcomeError);
     } else {
-      console.log("✅ Welcome email sent to:", email);
+      console.log("✅ Welcome email sent");
     }
     
+    console.log("=================================================\n");
+    
     res.status(200).json({ 
+      success: true,
       code: 200, 
-      status: "Successfully subscribed!" 
+      status: "Successfully subscribed! Check your email." 
     });
     
   } catch (error) {
-    console.error("❌ Error in newsletter subscription:", error);
+    console.error("❌ Newsletter error:", error);
     res.status(500).json({ 
+      success: false,
       code: 500, 
-      status: "Error processing subscription. Please try again later.",
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      status: "Error processing subscription",
+      error: error.message
     });
   }
 });
 
-// 404 handler
+// ============= 404 HANDLER =============
 app.use((req, res) => {
+  console.log("❌ 404 - Route not found:", req.method, req.path);
   res.status(404).json({ 
+    success: false,
     code: 404, 
     status: "Endpoint not found",
+    method: req.method,
     path: req.path
   });
 });
 
-// Error handler
+// ============= ERROR HANDLER =============
 app.use((err, req, res, next) => {
-  console.error("Server Error:", err);
+  console.error("❌ ============= SERVER ERROR =============");
+  console.error("Error:", err.message);
+  console.error("Stack:", err.stack);
+  console.error("==========================================");
+  
   res.status(500).json({ 
+    success: false,
     code: 500, 
     status: "Internal server error",
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    error: err.message
   });
 });
 
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+// ============= START SERVER =============
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log("\n✅ ==========================================");
+  console.log("✅  SERVER IS RUNNING SUCCESSFULLY!");
+  console.log("✅ ==========================================");
+  console.log(`🌐 Server URL: http://localhost:${PORT}`);
+  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`⏰ Started at: ${new Date().toLocaleString()}`);
+  console.log("✅ ==========================================\n");
+});
+
+// Handle server errors
+server.on('error', (error) => {
+  console.error("\n❌ ==========================================");
+  console.error("❌  SERVER FAILED TO START!");
+  console.error("❌ ==========================================");
+  console.error("Error:", error.message);
+  console.error("==========================================\n");
+  process.exit(1);
 });
