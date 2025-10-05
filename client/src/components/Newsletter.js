@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Col, Row } from "react-bootstrap";
+const API_URL = process.env.REACT_APP_API_URL;
 
 export const Newsletter = () => {
   const [email, setEmail] = useState('');
@@ -22,7 +23,7 @@ export const Newsletter = () => {
     setMessage('Subscribing...');
     
     try {
-      const response = await fetch("http://localhost:5000/newsletter", {
+      const response = await fetch(`${API_URL}/newsletter`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json;charset=utf-8",

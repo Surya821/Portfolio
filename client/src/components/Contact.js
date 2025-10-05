@@ -3,6 +3,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import contactImg from "../assets/img/contact-img.svg";
 import 'animate.css';
 import TrackVisibility from 'react-on-screen';
+const API_URL = process.env.REACT_APP_API_URL;
 
 export const Contact = () => {
   const formInitialDetails = {
@@ -29,13 +30,11 @@ export const Contact = () => {
     setButtonText("Sending...");
     
     try {
-      let response = await fetch("http://localhost:5000/contact", {
+      let response = await fetch(`${API_URL}/contact`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json;charset=utf-8",
-        },
+        headers: { "Content-Type": "application/json;charset=utf-8" },
         body: JSON.stringify(formDetails),
-      });
+      });      
       
       setButtonText("Send");
       let result = await response.json();
