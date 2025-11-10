@@ -33,8 +33,9 @@ const LazyImage = ({ src, alt, className = "" }) => {
     }
 
     return () => {
-      if (observer && imgRef.current) {
-        observer.unobserve(imgRef.current);
+      const img = imgRef.current;
+      if (observer && img) {
+        observer.unobserve(img);
       }
     };
   }, [src]);
