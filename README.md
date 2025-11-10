@@ -117,8 +117,8 @@ Portfolio/
 │   │   ├── App.js
 │   │   └── index.js
 │   └── README.md
-├── server/
-│   └── server.js
+└── server/
+    └── server.js
 
 ```
 
