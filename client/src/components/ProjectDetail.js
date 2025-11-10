@@ -250,12 +250,12 @@ export const ProjectDetail = () => {
                     <p className="project-subtitle">{project.description}</p>
                   </div>
 
-                  <div className="project-main-image">
+                  {/* <div className="project-main-image">
                     <LazyImage 
                       src={project.images[0]} 
                       alt={project.title}
                     />
-                  </div>
+                  </div> */}
 
                   <Row className="project-info-section">
                     <Col lg={8}>
@@ -321,7 +321,7 @@ export const ProjectDetail = () => {
                     <div className="project-gallery">
                       <h3>Project Gallery</h3>
                       <Row>
-                        {project.images.slice(1).map((image, index) => (
+                        {project.images.slice(0).map((image, index) => (
                           <Col key={index} md={6} className="mb-4">
                             <div className="gallery-image">
                               <LazyImage 
