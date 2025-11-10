@@ -1,17 +1,7 @@
 import { Container, Row, Col } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import colorSharp2 from "../assets/img/color-sharp2.png";
-import FImg1 from "../assets/ProjImg/Fhome.png";
-import FImg2 from "../assets/ProjImg/Fmenu.png";
-import FImg3 from "../assets/ProjImg/Fcontact.png";
-import MImg1 from "../assets/ProjImg/Mhome.png";
-import MImg2 from "../assets/ProjImg/Mfavorite.png";
-import MImg3 from "../assets/ProjImg/Msearch.png";
-import EImg1 from "../assets/ProjImg/Ehome.png";
-import EImg2 from "../assets/ProjImg/Eproduct.png";
-import EImg3 from "../assets/ProjImg/Ecart.png";
-import projImg4 from "../assets/img/project-img4.png";
+import assets from "../assets";
 import 'animate.css';
 import TrackVisibility from 'react-on-screen';
 
@@ -35,7 +25,7 @@ const LazyImage = ({ src, alt, className = "" }) => {
           });
         },
         {
-          rootMargin: '100px', // Start loading 100px before visible
+          rootMargin: '100px', 
         }
       );
 
@@ -87,6 +77,23 @@ export const ProjectDetail = () => {
   const navigate = useNavigate();
 
   const projectsData = {
+    "quickchat": {
+      title: "QuickChat by Surya",
+      description: "Real-time Chat Application",
+      fullDescription: "QuickChat is a real-time messaging application built using the MERN stack with Socket.IO for instant communication. It includes secure authentication, profile customization, image uploads via Cloudinary, and a clean responsive UI for seamless chatting.",
+      technologies: ["React", "Vite", "TailwindCSS", "Node.js", "Express", "MongoDB", "Socket.IO", "JWT", "Cloudinary"],
+      features: [
+        "Real-time 1-to-1 private messaging",
+        "JWT-based secure authentication",
+        "Profile update with image upload",
+        "Cloudinary media storage support",
+        "Online users indicator",
+        "Fully responsive UI (Desktop & Tablet)"
+      ],
+      images: [assets.chatSignupDesktop, assets.chatLoginDesktop, assets.chatHomeDesktop, assets.chatDesktop, assets.chatProfileDesktop],
+      demoUrl: "https://quickchatbysurya.vercel.app",
+      githubUrl: "https://github.com/Surya821/Chat-App"
+    },    
     "food-delivery-app": {
       title: "Food Delivery App",
       description: "UI Design & Development",
@@ -99,7 +106,7 @@ export const ProjectDetail = () => {
         "User authentication and profiles",
         "Rating and review system"
       ],
-      images: [FImg1, FImg2, FImg3],
+      images: [assets.FImg1, assets.FImg2, assets.FImg3],
       demoUrl: "https://food-delivery-app-two-pi.vercel.app/",
       githubUrl: "https://github.com/Surya821/Food-Delivery-App"
     },
@@ -115,7 +122,7 @@ export const ProjectDetail = () => {
         "Watchlist functionality",
         "Responsive design"
       ],
-      images: [MImg1, MImg2, MImg3],
+      images: [assets.MImg1, assets.MImg2, assets.MImg3],
       demoUrl: "https://movie-app-two-cyan-50.vercel.app/",
       githubUrl: "https://github.com/Surya821/Movie-App"
     },
@@ -131,7 +138,7 @@ export const ProjectDetail = () => {
         "Order history and tracking",
         "Admin dashboard"
       ],
-      images: [EImg1, EImg2, EImg3],
+      images: [assets.EImg1, assets.EImg2, assets.EImg3],
       demoUrl: "https://e-commerce-website-one-psi.vercel.app/",
       githubUrl: "https://github.com/Surya821/E-Commerce-Website"
     },
@@ -147,10 +154,59 @@ export const ProjectDetail = () => {
         "Audio visualization",
         "Favorite tracks management"
       ],
-      images: [projImg4],
+      images: [assets.projImg4],
       demoUrl: "https://surya821.github.io/Music-Player/",
       githubUrl: "https://github.com/Surya821/Music-Player"
-    }
+    },
+    "Email-Spam-Classifier": {
+      title: "Email Spam Classifier",
+      description: "A machine learning model that classifies emails as spam or not spam.",
+      fullDescription: "An intelligent email spam detection system built using machine learning techniques. It analyzes email content and classifies messages as 'Spam' or 'Not Spam' based on patterns in the text. The project involves data preprocessing, feature extraction using TF-IDF vectorization, and model training with algorithms like Naive Bayes and Logistic Regression to achieve high accuracy.",
+      technologies: ["Python", "Scikit-learn", "Pandas", "NumPy", "Matplotlib"],
+      features: [
+        "Text preprocessing and cleaning",
+        "Feature extraction using TF-IDF",
+        "Spam vs. Ham classification",
+        "Model evaluation and accuracy visualization",
+        "Interactive user input for testing emails"
+      ],
+      images: [assets.Email],
+      demoUrl: "#",
+      githubUrl: "https://github.com/Surya821/Email-Spam-Classifier"
+    },
+    "Face-Feature-Detection": {
+      title: "Face Feature Detection",
+      description: "A computer vision project that detects and analyzes key facial features using machine learning.",
+      fullDescription: "A face feature detection system built using computer vision and machine learning techniques. It identifies and marks key facial features such as eyes, nose, and mouth in images or real-time video. The project uses OpenCV and Haar Cascade classifiers (or Dlib/MediaPipe) to perform face detection and landmark recognition, providing a foundation for applications like emotion recognition, facial authentication, and augmented reality.",
+      technologies: ["Python", "OpenCV", "NumPy", "Matplotlib", "Dlib"],
+      features: [
+        "Real-time face and feature detection",
+        "Detection of eyes, nose, and mouth",
+        "Image and webcam input support",
+        "Visualization of facial landmarks",
+        "Efficient and accurate detection using OpenCV"
+      ],
+      images: [assets.Face],
+      demoUrl: "#",
+      githubUrl: "https://github.com/Surya821/Face-Feature-Detection"
+    },    
+    "Breast-Cancer-Detectionp": {
+      title: "Breast Cancer Detection",
+      description: "A machine learning model that predicts whether a tumor is malignant or benign based on cell data.",
+      fullDescription: "A predictive machine learning project that helps in early detection of breast cancer using diagnostic data. The model analyzes various cellular features to classify tumors as benign (non-cancerous) or malignant (cancerous). It involves data preprocessing, feature selection, and model training using algorithms like Logistic Regression, Support Vector Machine (SVM), and Random Forest, providing high accuracy and explainability.",
+      technologies: ["Python", "Scikit-learn", "Pandas", "NumPy", "Matplotlib", "Seaborn"],
+      features: [
+        "Data preprocessing and cleaning",
+        "Feature selection and visualization",
+        "Classification using ML algorithms",
+        "Accuracy evaluation and confusion matrix",
+        "Prediction for new patient data"
+      ],
+      images: [assets.Breast],
+      demoUrl: "#",
+      githubUrl: "https://github.com/Surya821/Breast-Cancer-Detection"
+    },
+    
   };
 
   const project = projectsData[id];
@@ -283,7 +339,7 @@ export const ProjectDetail = () => {
           </Col>
         </Row>
       </Container>
-      <img className="background-image-right" src={colorSharp2} alt="" loading="lazy" />
+      <img className="background-image-right" src={assets.colorSharp2} alt="" loading="lazy" />
     </section>
   );
 }

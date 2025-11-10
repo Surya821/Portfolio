@@ -8,8 +8,8 @@ const PORT = process.env.PORT || 5000;
 
 // ============= SIMPLE CORS - ALLOW EVERYTHING =============
 app.use(cors());
-app.use(json());
-app.use(urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // ============= RESEND SETUP (LAZY LOAD) =============
 let resend = null;

@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
-import navIcon1 from '../assets/img/nav-icon1.svg';
-import navIcon2 from '../assets/img/nav-icon2.svg';
-import navIcon3 from '../assets/img/nav-icon3.svg';
+import {assets} from '../assets.js'
 
 export const NavBar = () => {
   const [activeLink, setActiveLink] = useState('home');
@@ -92,12 +90,22 @@ export const NavBar = () => {
             >
               Projects
             </Nav.Link>
+            <Nav.Link 
+              href="#certificates" 
+              className={activeLink === 'certificates' ? 'active navbar-link' : 'navbar-link'} 
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick('certificates');
+              }}
+            >
+              Certificates
+            </Nav.Link>
           </Nav>
           <span className="navbar-text">
             <div className="social-icon">
-              <a href="https://www.linkedin.com/in/surya-pratap-singh1/" target="_blank" rel="noopener noreferrer"><img src={navIcon1} alt="" /></a>
-              <a href="https://github.com/Surya821" target="_blank" rel="noopener noreferrer"><img src={navIcon2} alt="" /></a>
-              <a href="https://leetcode.com/u/suryapratap821/" target="_blank" rel="noopener noreferrer"><img src={navIcon3} alt="" /></a>
+              <a href="https://www.linkedin.com/in/surya-pratap-singh1/" target="_blank" rel="noopener noreferrer"><img src={assets.navIcon1} alt="" /></a>
+              <a href="https://github.com/Surya821" target="_blank" rel="noopener noreferrer"><img src={assets.navIcon2} alt="" /></a>
+              <a href="https://leetcode.com/u/suryapratap821/" target="_blank" rel="noopener noreferrer"><img src={assets.navIcon3} alt="" /></a>
             </div>
             <button className="vvd" onClick={() => handleNavClick('connect')}>
               <span>Let's Connect</span>

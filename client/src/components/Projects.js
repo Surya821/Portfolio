@@ -1,9 +1,7 @@
 import { Container, Row, Col, Tab, Nav } from "react-bootstrap";
 import { ProjectCard } from "./ProjectCard";
-import projImg1 from "../assets/img/project-img1.png";
-import projImg2 from "../assets/img/project-img2.png";
-import projImg3 from "../assets/img/project-img3.png";
-import projImg4 from "../assets/img/project-img4.png";
+import {assets} from '../assets.js'
+
 
 import colorSharp2 from "../assets/img/color-sharp2.png";
 import 'animate.css';
@@ -13,29 +11,53 @@ export const Projects = () => {
 
   const projects = [
     {
+      id: "quickchat",
+      title: "QuickChat by Surya",
+      description: "UI Design & Development",
+      imgUrl: assets.chatHomeDesktop,
+    },
+    {
       id: "food-delivery-app",
       title: "Food Delivery App",
       description: "UI Design & Development",
-      imgUrl: projImg1,
+      imgUrl: assets.projImg1,
     },
     {
       id: "movie-app",
       title: "Movie App",
       description: "Dynamic Movie Finder",
-      imgUrl: projImg2,
+      imgUrl: assets.projImg2,
     },
     {
       id: "e-commerce-website",
       title: "E-Commerce-Website",
       description: "React-Powered Online Store",
-      imgUrl: projImg3,
+      imgUrl: assets.projImg3,
     },
     {
       id: "music-player",
       title: "Music Player",
       description: "Deezer-Powered Music Player",
-      imgUrl: projImg4,
+      imgUrl: assets.projImg4,
     },
+    {
+      id: "Email-Spam-Classifier",
+      title: "Email Spam Classifier",
+      description: "Spam email detection using ML",
+      imgUrl: assets.Email,
+    },
+    {
+      id: "Face-Feature-Detection",
+      title: "Face Feature Detection",
+      description: "Facial feature detection using AI",
+      imgUrl: assets.Face,
+    },
+    {
+      id: "Breast-Cancer-Detectionp",
+      title: "Breast Cancer Detection",
+      description: "ML-based cancer prediction model",
+      imgUrl: assets.Breast,
+    },    
   ];
 
   return (
@@ -75,7 +97,7 @@ export const Projects = () => {
           </Col>
         </Row>
       </Container>
-      <img className="background-image-right" src={colorSharp2} alt="" />
+      <img className="background-image-right" src={assets.colorSharp2} alt="" />
     </section>
   )
 }

@@ -1793,3 +1793,244 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
     transform: scale(1);
   }
 }
+
+/************ Certificates Css ************/
+.certificates {
+  padding: 80px 0;
+  position: relative;
+  background-color: #000;
+}
+
+.certificates-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.certificates-header h2 {
+  font-size: 45px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.certificates-header p {
+  color: #B8B8B8;
+  font-size: 18px;
+  letter-spacing: 0.8px;
+  line-height: 1.5em;
+  margin: 0 auto;
+  width: 70%;
+}
+
+.cert-card {
+  margin-bottom: 30px;
+  transition: transform 0.3s ease;
+}
+
+.cert-card:hover {
+  transform: translateY(-10px);
+}
+
+.cert-imgbx {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  height: 300px;
+  background: #151515;
+}
+
+.cert-imgbx img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cert-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(170, 54, 124, 0.95) 0%, rgba(74, 47, 189, 0.95) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 25px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.cert-overlay.active {
+  opacity: 1;
+}
+
+.cert-content {
+  text-align: center;
+  color: #fff;
+}
+
+.cert-content h4 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.cert-issuer {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  opacity: 0.95;
+}
+
+.cert-date {
+  font-size: 14px;
+  margin-bottom: 8px;
+  opacity: 0.85;
+}
+
+.cert-id {
+  font-size: 12px;
+  font-family: monospace;
+  margin-bottom: 15px;
+  opacity: 0.75;
+}
+
+.cert-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.skill-badge {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.cert-view-btn {
+  display: inline-block;
+  background: #fff;
+  color: #4A2FBD;
+  padding: 10px 25px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.cert-view-btn:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+  text-decoration: none;
+  color: #4A2FBD;
+}
+
+/* ===== CERTIFICATES RESPONSIVE FIXES ===== */
+@media (max-width: 991px) {
+  .certificates {
+    padding: 60px 0;
+  }
+
+  .certificates-header h2 {
+    font-size: 38px;
+  }
+
+  .certificates-header p {
+    width: 85%;
+    font-size: 16px;
+  }
+
+  .cert-imgbx {
+    height: 280px;
+  }
+
+  .cert-content h4 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .certificates {
+    padding: 50px 0;
+  }
+
+  .certificates-header {
+    margin-bottom: 40px;
+  }
+
+  .certificates-header h2 {
+    font-size: 32px;
+  }
+
+  .certificates-header p {
+    width: 100%;
+    font-size: 15px;
+  }
+
+  .cert-imgbx {
+    height: 250px;
+  }
+
+  .cert-content {
+    padding: 15px;
+  }
+
+  .cert-content h4 {
+    font-size: 18px;
+  }
+
+  .cert-issuer {
+    font-size: 14px;
+  }
+
+  .cert-date {
+    font-size: 13px;
+  }
+
+  .skill-badge {
+    font-size: 10px;
+    padding: 4px 10px;
+  }
+}
+
+@media (max-width: 575px) {
+  .certificates {
+    padding: 40px 0;
+  }
+
+  .certificates-header h2 {
+    font-size: 28px;
+  }
+
+  .certificates-header p {
+    font-size: 14px;
+  }
+
+  .cert-imgbx {
+    height: 220px;
+  }
+
+  .cert-card {
+    margin-bottom: 20px;
+  }
+
+  .cert-content h4 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .cert-view-btn {
+    font-size: 13px;
+    padding: 8px 20px;
+  }
+}

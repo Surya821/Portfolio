@@ -27,8 +27,7 @@ function AppContent() {
         } />
         <Route path="/project/:id" element={<ProjectDetail />} />
       </Routes>
-      {/* Only show Footer, not newsletter for project detail pages */}
-      <Footer hideNewsletter={isProjectDetail} />
+      <Footer hideNewsletter={isProjectDetail}/>
     </div>
   );
 }
