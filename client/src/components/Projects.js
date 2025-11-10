@@ -11,7 +11,7 @@ export const Projects = () => {
       id: "quickchat",
       title: "QuickChat by Surya",
       description: "UI Design & Development",
-      imgUrl: assets.chatHomeDesktop,
+      imgUrl: assets.chatHome4,
     },
     {
       id: "food-delivery-app",

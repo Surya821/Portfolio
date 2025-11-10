@@ -46,6 +46,7 @@ import chatDesktop from "./assets/ProjImg/chat-desktop.png";
 import chatHomeDesktop from "./assets/ProjImg/home-desktop.png";
 import chatProfileDesktop from "./assets/ProjImg/profile-desktop.png";
 import chatSignupDesktop from "./assets/ProjImg/signup-desktop.png";
+import chatHome4 from "./assets/ProjImg/home-desktop-4.png"
 
 // Export all assets
 export const assets = {
@@ -99,6 +100,7 @@ export const assets = {
   chatHomeDesktop,
   chatProfileDesktop,
   chatSignupDesktop,
+  chatHome4,
 };
 
 export default assets;
