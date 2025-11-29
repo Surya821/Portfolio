@@ -1,4 +1,3 @@
-<img width="1920" height="1080" alt="portfolio-banner" src="https://github.com/user-attachments/assets/YOUR_IMAGE_HERE" />
 <div id="top"></div>
 
 <div align="center">
@@ -117,8 +116,8 @@ Portfolio/
 │   │   ├── App.js
 │   │   └── index.js
 │   └── README.md
-├── server/
-│   └── server.js
+└── server/
+    └── server.js
 
 ```
 
