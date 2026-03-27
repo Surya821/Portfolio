@@ -3,6 +3,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import { assets } from "../assets";
 import 'animate.css';
 import TrackVisibility from 'react-on-screen';
+
 const API_URL = process.env.REACT_APP_API_URL;
 
 export const Contact = () => {

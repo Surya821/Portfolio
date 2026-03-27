@@ -78,7 +78,97 @@ export const ProjectDetail = () => {
   const navigate = useNavigate();
 
   const projectsData = {
+    "farmlens": {
+      title: "FARMLENS: AI-Powered Cattle Health Ecosystem",
+      description: "Enterprise-grade Microservice Solution for Modern Livestock Farming",
+      fullDescription: "FarmLens is a comprehensive AI ecosystem designed for cattle health and farm management. It utilizes a microservices architecture with a Node.js management API and a Python ML inference API. The platform features deep-learning identification of 41+ breeds, skin disease detection (LSD/FMD) via DenseNet121, and a multilingual LLM assistant powered by Groq/Llama-3.",
+      technologies: ["React", "Node.js", "Python", "FastAPI", "PyTorch", "TensorFlow", "MongoDB", "Groq (Llama 3)", "Stripe"],
+      features: [
+        "Deep-Vision Cattle Identification (41+ breeds) using ConvNeXt-Tiny",
+        "Comprehensive Diagnostics: Scan for Lumpy Skin and Foot & Mouth diseases",
+        "Symptom Analysis: Random Forest mapper for 92 symptoms to 26 diseases",
+        "Multilingual AI Chatbot (Groq Llama 3) for medical & management advice",
+        "Adaptive Design System for high-glare outdoor farming conditions",
+        "Developer API (V1) for breed prediction and symptom diagnosis"
+      ],
+      images: [
+        assets.Farmlens3,
+        assets.Farmlens2,
+        assets.Farmlens5,
+        assets.Farmlens6,
+        assets.Farmlens7,
+        assets.Farmlens12,
+        assets.Farmlens13,
+        assets.Farmlens14,
+        assets.Farmlens15,
+        assets.Farmlens17,
+        assets.Farmlens20,
+        assets.Farmlens22,
+        assets.Farmlens23,
+        assets.Farmlens24,
+        assets.Farmlens25
+      ],
+      demoUrl: "https://farmlens.vercel.app",
+      githubUrl: "https://github.com/Surya821/farmlens"
+    },
+    "edemy-lms": {
+
+      title: "Edemy LMS",
+      description: "Full-Stack Learning Management System",
+      fullDescription: "Edemy is a comprehensive, modern learning management platform built with the MERN stack and integrated with Clerk for secure authentication. It empowers educators to create curriculum and allows students to discovery, enroll, and learn through a premium video player experience.",
+      technologies: ["React", "Node.js", "Express", "MongoDB", "Clerk Auth", "Cloudinary", "Tailwind CSS", "Quill.js"],
+      features: [
+        "Student Portal with course discovery and filtering",
+        "Educator Dashboard with powerful analytics and course management",
+        "Premium Video Player with chapter navigation",
+        "Clerk Authentication with Webhook sync to MongoDB",
+        "Rich text editor (Quill.js) for course descriptions",
+        "Cloudinary integration for automatic thumbnail uploads"
+      ],
+      images: [
+        assets.EdemyHome,
+        assets.EdemyAddCourse,
+        assets.EdemyCourse,
+        assets.EdemyCourses,
+        assets.EdemyManageCourse,
+        assets.EdemyTeacher,
+        assets.EdemyUsers
+      ],
+
+      demoUrl: "https://edemy-woad.vercel.app/", // Add your live demo link here
+      githubUrl: "https://github.com/Surya821/Edemy" // Add your github repository link here
+    },
+    "insider-jobs": {
+      title: "INSIDERJOBS",
+      description: "Full-Stack MERN Job Portal Web Application",
+      fullDescription: "Insiderjobs is a robust full-stack job portal built with the MERN stack. It offers dual roles for Candidates and Recruiters, featuring a complete workflow from job posting and management to resume-based applications and status tracking. The app ensures secure authentication with Clerk (Candidates) and custom JWT (Recruiters).",
+      technologies: ["React", "Express", "Node.js", "MongoDB", "Clerk", "Cloudinary", "JWT", "Quill Editor"],
+      features: [
+        "Candidate Job Search with category & location filtering",
+        "Resume (PDF) upload & management via Cloudinary",
+        "Application tracking (Pending/Accepted/Rejected status)",
+        "Recruiter Dashboard for job posting & management",
+        "Company branding with logo uploads",
+        "Real-time UI notifications via React Toastify"
+      ],
+      images: [
+        assets.JobHome,
+        assets.JobDetails,
+        assets.JobAddJob,
+        assets.JobAppliedJobs,
+        assets.JobCandidateLogin,
+        assets.JobCandidateRegister,
+        assets.JobManageJobs,
+        assets.JobRecruiterLogin,
+        assets.JobRecruiterRegister,
+        assets.JobViewApplications
+      ],
+      demoUrl: "https://insider-job-eight.vercel.app/",
+      githubUrl: "https://github.com/Surya821/InsiderJob"
+    },
     "quickchat": {
+
+
       title: "QuickChat by Surya",
       description: "Real-time Chat Application",
       fullDescription: "QuickChat is a real-time messaging application built using the MERN stack with Socket.IO for instant communication. It includes secure authentication, profile customization, image uploads via Cloudinary, and a clean responsive UI for seamless chatting.",

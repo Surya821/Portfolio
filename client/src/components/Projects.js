@@ -8,11 +8,32 @@ export const Projects = () => {
 
   const projects = [
     {
+      id: "farmlens",
+      title: "FARMLENS",
+      description: "AI-Powered Ecosystem for Cattle Health",
+      imgUrl: assets.Farmlens5,
+    },
+    {
+      id: "edemy-lms",
+
+      title: "Edemy LMS",
+      description: "Full-Stack Learning Management System",
+      imgUrl: assets.EdemyHome,
+    },
+    {
+      id: "insider-jobs",
+      title: "INSIDERJOBS",
+      description: "Full-Stack Job Portal Web Application",
+      imgUrl: assets.JobHome,
+    },
+    {
       id: "quickchat",
+
       title: "QuickChat by Surya",
       description: "UI Design & Development",
       imgUrl: assets.chatHome4,
     },
+
     {
       id: "food-delivery-app",
       title: "Food Delivery App",
@@ -50,7 +71,7 @@ export const Projects = () => {
       imgUrl: assets.Face,
     },
     {
-      id: "Breast-Cancer-Detectionp",
+      id: "Breast-Cancer-Detection",
       title: "Breast Cancer Detection",
       description: "ML-based cancer prediction model",
       imgUrl: assets.Breast,
