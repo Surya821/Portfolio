@@ -21,12 +21,14 @@ function AppContent() {
           <>
             <Banner />
             <Skills />
-            <Projects />
+            <Projects isHome={true} />
             <Contact />
           </>
         } />
+        <Route path="/projects" element={<Projects isHome={false} />} />
         <Route path="/project/:id" element={<ProjectDetail />} />
       </Routes>
+
       <Footer hideNewsletter={isProjectDetail}/>
     </div>
   );

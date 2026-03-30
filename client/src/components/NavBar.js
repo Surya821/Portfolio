@@ -30,8 +30,8 @@ export const NavBar = () => {
   const handleNavClick = (section) => {
     onUpdateActiveLink(section);
     
-    // If we're on a project detail page, navigate to home first
-    if (location.pathname.startsWith('/project/')) {
+    // If we're on a project detail page or projects list page, navigate to home first
+    if (location.pathname.startsWith('/project/') || location.pathname === '/projects') {
       navigate('/', { replace: true });
       // Wait for navigation to complete, then scroll
       setTimeout(() => {

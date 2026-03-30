@@ -1,93 +1,28 @@
 import { Container, Row, Col, Tab, Nav } from "react-bootstrap";
 import { ProjectCard } from "./ProjectCard";
-import {assets} from '../assets.js'
+import { assets } from '../assets.js';
+import { projects as projectsData } from '../data/projectsData';
+import { Link } from 'react-router-dom';
 import 'animate.css';
 import TrackVisibility from 'react-on-screen';
 
-export const Projects = () => {
-
-  const projects = [
-    {
-      id: "farmlens",
-      title: "FARMLENS",
-      description: "AI-Powered Ecosystem for Cattle Health",
-      imgUrl: assets.Farmlens5,
-    },
-    {
-      id: "edemy-lms",
-
-      title: "Edemy LMS",
-      description: "Full-Stack Learning Management System",
-      imgUrl: assets.EdemyHome,
-    },
-    {
-      id: "insider-jobs",
-      title: "INSIDERJOBS",
-      description: "Full-Stack Job Portal Web Application",
-      imgUrl: assets.JobHome,
-    },
-    {
-      id: "quickchat",
-
-      title: "QuickChat by Surya",
-      description: "UI Design & Development",
-      imgUrl: assets.chatHome4,
-    },
-
-    {
-      id: "food-delivery-app",
-      title: "Food Delivery App",
-      description: "UI Design & Development",
-      imgUrl: assets.projImg1,
-    },
-    {
-      id: "movie-app",
-      title: "Movie App",
-      description: "Dynamic Movie Finder",
-      imgUrl: assets.projImg2,
-    },
-    {
-      id: "e-commerce-website",
-      title: "E-Commerce-Website",
-      description: "React-Powered Online Store",
-      imgUrl: assets.projImg3,
-    },
-    {
-      id: "music-player",
-      title: "Music Player",
-      description: "Deezer-Powered Music Player",
-      imgUrl: assets.projImg4,
-    },
-    {
-      id: "Email-Spam-Classifier",
-      title: "Email Spam Classifier",
-      description: "Spam email detection using ML",
-      imgUrl: assets.Email,
-    },
-    {
-      id: "Face-Feature-Detection",
-      title: "Face Feature Detection",
-      description: "Facial feature detection using AI",
-      imgUrl: assets.Face,
-    },
-    {
-      id: "Breast-Cancer-Detection",
-      title: "Breast Cancer Detection",
-      description: "ML-based cancer prediction model",
-      imgUrl: assets.Breast,
-    },    
-  ];
+export const Projects = ({ isHome = true }) => {
+  const displayProjects = isHome ? projectsData.slice(0, 3) : projectsData;
 
   return (
-    <section className="project" id="projects">
+    <section className={`project ${isHome ? "": "projects-page"}`} id="projects">
       <Container>
         <Row>
           <Col size={12}>
             <TrackVisibility>
               {({ isVisible }) =>
               <div className={isVisible ? "animate__animated animate__fadeIn": ""}>
-                <h2>Projects</h2>
-                <p>Explore my portfolio of innovative web applications. Each project showcases unique features, modern design principles, and cutting-edge technologies. Click on any project to learn more about its development process and see it in action.</p>
+                <h2>{isHome ? "Latest Projects" : "All My Projects"}</h2>
+                <p>
+                  {isHome 
+                    ? "Explore some of my most recent work. Each project represents a unique challenge and solution."
+                    : "A comprehensive showcase of various web applications and ML models I've built, ranging from e-commerce to AI solutions."}
+                </p>
                 <Tab.Container id="projects-tabs" defaultActiveKey="first">
                   <Nav variant="pills" className="nav-pills mb-5 justify-content-center align-items-center" id="pills-tab">
                     {/* Tabs commented out - can be enabled if needed */}
@@ -96,7 +31,7 @@ export const Projects = () => {
                     <Tab.Pane eventKey="first">
                       <Row>
                         {
-                          projects.map((project, index) => {
+                          displayProjects.map((project, index) => {
                             return (
                               <ProjectCard
                                 key={index}
@@ -110,6 +45,21 @@ export const Projects = () => {
                     </Tab.Pane>
                   </Tab.Content>
                 </Tab.Container>
+                {isHome && (
+                  <div className="text-center mt-5 pt-3">
+                    <Link to="/projects" className="see-all-btn">
+                      <span>See All Projects 
+                        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <polyline points="12 16 16 12 12 8"/>
+                          <line x1="8" y1="12" x2="16" y2="12"/>
+                        </svg>
+                      </span>
+                    </Link>
+                  </div>
+                )}
+
+
               </div>}
             </TrackVisibility>
           </Col>
